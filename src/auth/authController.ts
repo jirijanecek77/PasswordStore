@@ -2,12 +2,13 @@ import {Controller, Get, Req, UseGuards} from "@nestjs/common"
 import {AuthGuard} from "@nestjs/passport"
 import {JwtService} from "@nestjs/jwt"
 import {JwtPayload} from "./jwtPayload"
+import {ApiTags} from "@nestjs/swagger"
 
+@ApiTags('Google Auth Controller')
 @Controller('google')
 export class AuthController {
     constructor(private readonly jwtService: JwtService,) {
     }
-
 
     @Get()
     @UseGuards(AuthGuard('google'))

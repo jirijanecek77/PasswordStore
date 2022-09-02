@@ -7,3 +7,8 @@ Initialize DB before first run:
 Install dependencies `npm install`
 
 Run application `npm run start`
+
+
+### Documentation
+
+`http://localhost:3001/api`
