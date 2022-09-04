@@ -21,11 +21,17 @@ export class PasswordRepository {
         return result.insertedId
     }
 
-    public async findAll(userId: string): Promise<PasswordEntry[]> {
+    public async findBy(userId: string, serverSearch?: string, loginSearch?: string): Promise<PasswordEntry[]> {
+        const filter = {
+            userId: userId,
+            ...(serverSearch ? {server: {$regex: serverSearch, $options: 'i'}} : null),
+            ...(loginSearch ? {login: {$regex: loginSearch, $options: 'i'}} : null),
+        }
+
         return this.mongoClient
             .db(process.env.DB_NAME)
             .collection<PasswordEntry>(PASSWORDS_COLLECTION)
-            .find({userId})
+            .find(filter)
             .toArray()
     }
 

@@ -18,6 +18,7 @@ import {JwtPayload} from "../auth/jwtPayload"
 import {PasswordDto} from "./passwordDto"
 import {UpdatePasswordDto} from "./updatePasswordDto"
 import {ApiBearerAuth, ApiResponse, ApiTags} from "@nestjs/swagger"
+import {Query} from "@nestjs/common/decorators/http/route-params.decorator"
 
 @Controller('api/password')
 @UseGuards(JwtAuthGuard)
@@ -37,9 +38,13 @@ export class PasswordController {
         type: PasswordDto,
         isArray: true
     })
-    async getPasswords(@Headers('Authorization') auth: string): Promise<PasswordDto[]> {
+    async searchPasswords(
+        @Headers('Authorization') auth: string,
+        @Query("server") serverSearch?: string,
+        @Query("login") loginSearch?: string,
+    ): Promise<PasswordDto[]> {
         const userId = this.extractUserId(auth)
-        return (await this.passwordService.findAll(userId)).map(e => PasswordDto.from(e))
+        return (await this.passwordService.searchPassword(userId, serverSearch, loginSearch)).map(e => PasswordDto.from(e))
     }
 
     @Get(':id')
@@ -80,6 +85,9 @@ export class PasswordController {
     }
 
     private extractUserId(auth: string): string {
+        if (!auth) {
+            throw new UnauthorizedException()
+        }
         const userId = (this.jwtService.decode(auth.split(' ')[1]) as JwtPayload).email
         if (!userId) {
             throw new UnauthorizedException("No userId")

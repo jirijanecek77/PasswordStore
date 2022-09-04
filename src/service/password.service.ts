@@ -20,9 +20,9 @@ export class PasswordService {
         return await this.getValidatedPasswordEntry(id, userId)
     }
 
-    public async findAll(userId: string): Promise<PasswordEntry[]> {
+    public async searchPassword(userId: string, serverSearch?: string, loginSearch?: string): Promise<PasswordEntry[]> {
         this.logger.debug("Get all passwords")
-        return await this.passwordRepository.findAll(userId)
+        return await this.passwordRepository.findBy(userId, serverSearch, loginSearch)
     }
 
     public async create(
