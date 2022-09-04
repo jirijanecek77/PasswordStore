@@ -15,12 +15,12 @@ export class PasswordDto {
     @ApiProperty()
     public password: string
 
-    public static from(bankAccount: PasswordEntry): PasswordDto {
+    public static from(passwordEntry: PasswordEntry): PasswordDto {
         const dto = new PasswordDto()
-        dto.id = bankAccount._id.toHexString()
-        dto.server = bankAccount.server
-        dto.login = bankAccount.login
-        dto.password = bankAccount.password
+        dto.id = passwordEntry._id.toHexString()
+        dto.server = passwordEntry.server
+        dto.login = passwordEntry.login
+        dto.password = passwordEntry.password
         return dto
     }
 }

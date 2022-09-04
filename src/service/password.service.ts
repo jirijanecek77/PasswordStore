@@ -3,25 +3,21 @@ import {MongoClient, ObjectId} from 'mongodb'
 import {PasswordRepository} from '../repository/password-repository.service'
 import {MONGODB_CLIENT} from '../constants'
 import {PasswordEntry} from '../model/password.entity'
-import {InjectPinoLogger, PinoLogger} from "nestjs-pino"
 import {UpdatePasswordDto} from "../api/updatePasswordDto"
 
 @Injectable()
 export class PasswordService {
     constructor(
-        @InjectPinoLogger(PasswordService.name) private readonly logger: PinoLogger,
         @Inject(MONGODB_CLIENT) private readonly mongoClient: MongoClient,
         private readonly passwordRepository: PasswordRepository,
     ) {
     }
 
     public async findById(id: string, userId): Promise<PasswordEntry> {
-        this.logger.debug("Get password with id '%s'", id)
         return await this.getValidatedPasswordEntry(id, userId)
     }
 
     public async searchPassword(userId: string, serverSearch?: string, loginSearch?: string): Promise<PasswordEntry[]> {
-        this.logger.debug("Get all passwords")
         return await this.passwordRepository.findBy(userId, serverSearch, loginSearch)
     }
 

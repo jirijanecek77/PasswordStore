@@ -5,7 +5,7 @@ import {PasswordService} from './service/password.service'
 import {PasswordController} from './api/passwordController'
 import {PasswordRepository} from './repository/password-repository.service'
 import {LoggerModule} from 'nestjs-pino'
-import {req, res} from 'pino-std-serializers'
+import {req} from 'pino-std-serializers'
 import {JwtStrategy} from "./auth/jwt.strategy"
 import {PassportModule} from "@nestjs/passport"
 import {JwtModule} from "@nestjs/jwt"
@@ -28,8 +28,7 @@ import {AuthController} from "./auth/authController"
                         return result
                     },
                     res: (r) => {
-                        const {headers, ...result} = res(r)
-                        return result
+                        return {statusCode: r.statusCode}
                     },
                 },
                 customLogLevel: (req, res, err) => {
