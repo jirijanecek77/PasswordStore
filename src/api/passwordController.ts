@@ -1,25 +1,14 @@
-import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    Headers,
-    Param,
-    Post,
-    Put,
-    UnauthorizedException,
-    UseGuards
-} from '@nestjs/common'
+import {Body, Controller, Delete, Get, Param, Post, Put, UnauthorizedException, UseGuards} from '@nestjs/common'
 import {PasswordService} from '../service/password.service'
 import {CreatePasswordDto} from "./createPasswordDto"
 import {JwtAuthGuard} from "../auth/jwt-auth.guard"
-import {JwtService} from "@nestjs/jwt"
-import {JwtPayload} from "../auth/jwtPayload"
+import {User} from "../auth/user"
 import {PasswordDto} from "./passwordDto"
 import {UpdatePasswordDto} from "./updatePasswordDto"
 import {ApiBearerAuth, ApiResponse, ApiTags} from "@nestjs/swagger"
 import {Query} from "@nestjs/common/decorators/http/route-params.decorator"
 import {InjectPinoLogger, PinoLogger} from "nestjs-pino"
+import {AuthUser} from "./userDecorator"
 
 @Controller('api/password')
 @UseGuards(JwtAuthGuard)
@@ -29,7 +18,6 @@ export class PasswordController {
     constructor(
         @InjectPinoLogger(PasswordController.name) private readonly logger: PinoLogger,
         private readonly passwordService: PasswordService,
-        private readonly jwtService: JwtService
     ) {
     }
 
@@ -41,11 +29,11 @@ export class PasswordController {
         isArray: true
     })
     async searchPasswords(
-        @Headers('Authorization') auth: string,
+        @AuthUser() user: User,
         @Query("server") serverSearch?: string,
         @Query("login") loginSearch?: string,
     ): Promise<PasswordDto[]> {
-        const userId = this.extractUserId(auth)
+        const userId = this.extractUserId(user)
 
         this.logger.info("User %s searches for passwords with server '%s' and login '%s'.", userId, serverSearch, loginSearch)
         const passwords = await this.passwordService.searchPassword(userId, serverSearch, loginSearch)
@@ -61,8 +49,8 @@ export class PasswordController {
         type: PasswordDto,
         isArray: false
     })
-    async getPasswordById(@Param('id') id: string, @Headers('Authorization') auth: string): Promise<PasswordDto> {
-        const userId = this.extractUserId(auth)
+    async getPasswordById(@Param('id') id: string, @AuthUser() user: User): Promise<PasswordDto> {
+        const userId = this.extractUserId(user)
 
         const passwordEntry = await this.passwordService.findById(id, userId)
         this.logger.info("User %s found password with id '%s'.", userId, id)
@@ -70,11 +58,12 @@ export class PasswordController {
     }
 
     @Post()
-    async insertPassword(@Body() body: CreatePasswordDto, @Headers('Authorization') auth: string): Promise<void> {
-        const userId = this.extractUserId(auth)
+    async insertPassword(@Body() body: CreatePasswordDto, @AuthUser() user: User) {
+        const userId = this.extractUserId(user)
 
         const id = await this.passwordService.create(userId, body.server, body.login, body.password)
         this.logger.info("User %s inserted new password with id '%s'.", userId, id.toHexString())
+        return {id: id}
     }
 
     @Put(':id')
@@ -84,8 +73,8 @@ export class PasswordController {
         type: PasswordDto,
         isArray: false
     })
-    async updatePassword(@Param('id') id: string, @Body() data: UpdatePasswordDto, @Headers('Authorization') auth: string): Promise<PasswordDto> {
-        const userId = this.extractUserId(auth)
+    async updatePassword(@Param('id') id: string, @Body() data: UpdatePasswordDto, @AuthUser() user: User): Promise<PasswordDto> {
+        const userId = this.extractUserId(user)
         const passwordEntry = await this.passwordService.update(id, userId, data)
 
         this.logger.info("User %s updated password with id '%s'.", userId, id)
@@ -93,17 +82,17 @@ export class PasswordController {
     }
 
     @Delete(':id')
-    async deletePassword(@Param('id') id: string, @Headers('Authorization') auth: string): Promise<void> {
-        const userId = this.extractUserId(auth)
+    async deletePassword(@Param('id') id: string, @AuthUser() user: User): Promise<void> {
+        const userId = this.extractUserId(user)
         await this.passwordService.delete(id, userId)
         this.logger.info("User %s deleted password with id '%s'.", userId, id)
     }
 
-    private extractUserId(auth: string): string {
-        if (!auth) {
+    private extractUserId(user: User): string {
+        if (!user) {
             throw new UnauthorizedException()
         }
-        const userId = (this.jwtService.decode(auth.split(' ')[1]) as JwtPayload).email
+        const userId = user.email
         if (!userId) {
             throw new UnauthorizedException("No userId")
         }

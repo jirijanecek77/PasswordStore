@@ -53,6 +53,7 @@
     "migrate-mongo": "^9.0.0",
     "prettier": "^2.7.1",
     "ts-jest": "^28.0.8",
+    "supertest": "^6.2.4",
     "ts-loader": "^9.3.1",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.1.0",

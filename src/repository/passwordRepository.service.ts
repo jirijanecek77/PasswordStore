@@ -53,10 +53,11 @@ export class PasswordRepository {
             ).then(e => e.value)
     }
 
-    async delete(id: string) {
+    async delete(id: string): Promise<boolean> {
         return this.mongoClient
             .db(process.env.DB_NAME)
             .collection<PasswordEntry>(PASSWORDS_COLLECTION)
             .deleteOne({_id: ObjectId.createFromHexString(id)})
+            .then(e => e.acknowledged)
     }
 }

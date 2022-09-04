@@ -3,7 +3,7 @@ import {Module} from '@nestjs/common'
 import {DbModule} from './db.module'
 import {PasswordService} from './service/password.service'
 import {PasswordController} from './api/passwordController'
-import {PasswordRepository} from './repository/password-repository.service'
+import {PasswordRepository} from './repository/passwordRepository.service'
 import {LoggerModule} from 'nestjs-pino'
 import {req} from 'pino-std-serializers'
 import {JwtStrategy} from "./auth/jwt.strategy"

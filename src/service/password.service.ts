@@ -1,14 +1,12 @@
-import {BadRequestException, Inject, Injectable, NotFoundException} from '@nestjs/common'
-import {MongoClient, ObjectId} from 'mongodb'
-import {PasswordRepository} from '../repository/password-repository.service'
-import {MONGODB_CLIENT} from '../constants'
+import {BadRequestException, Injectable, NotFoundException} from '@nestjs/common'
+import {ObjectId} from 'mongodb'
+import {PasswordRepository} from '../repository/passwordRepository.service'
 import {PasswordEntry} from '../model/password.entity'
 import {UpdatePasswordDto} from "../api/updatePasswordDto"
 
 @Injectable()
 export class PasswordService {
     constructor(
-        @Inject(MONGODB_CLIENT) private readonly mongoClient: MongoClient,
         private readonly passwordRepository: PasswordRepository,
     ) {
     }
@@ -43,7 +41,10 @@ export class PasswordService {
 
     public async delete(id: string, userId) {
         await this.getValidatedPasswordEntry(id, userId)
-        await this.passwordRepository.delete(id)
+        const ack = await this.passwordRepository.delete(id)
+        if (!ack) {
+            throw new Error("Password deletion failed!")
+        }
     }
 
     private async getValidatedPasswordEntry(id: string, userId: string): Promise<PasswordEntry> {
