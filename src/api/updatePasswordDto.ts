@@ -3,11 +3,11 @@ import {ApiProperty} from "@nestjs/swagger"
 export class UpdatePasswordDto {
 
     @ApiProperty()
-    public server: string
+    public server?: string
 
     @ApiProperty()
-    public login: string
+    public login?: string
 
     @ApiProperty()
-    public password: string
+    public password?: string
 }

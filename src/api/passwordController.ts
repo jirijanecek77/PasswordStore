@@ -9,6 +9,7 @@ import {ApiBearerAuth, ApiResponse, ApiTags} from "@nestjs/swagger"
 import {Query} from "@nestjs/common/decorators/http/route-params.decorator"
 import {InjectPinoLogger, PinoLogger} from "nestjs-pino"
 import {AuthUser} from "./userDecorator"
+import {ApiImplicitQuery} from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator"
 
 @Controller('api/password')
 @UseGuards(JwtAuthGuard)
@@ -22,6 +23,16 @@ export class PasswordController {
     }
 
     @Get()
+    @ApiImplicitQuery({
+        name: 'server',
+        required: false,
+        type: String,
+    })
+    @ApiImplicitQuery({
+        name: 'login',
+        required: false,
+        type: String,
+    })
     @ApiResponse({
         status: 200,
         description: 'All passwords',
